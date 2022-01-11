@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import filedialog as fd
 import sys
 from functools import partial
+import pyglet
 
 
 def getpath():
@@ -22,10 +23,26 @@ def checkfile(path):
         sys.exit("File not supported. Try png or jpg.")
     
 def on_main_click(canvas, rect, event):
-    global posi
+    global posi, move
+    if move:
+        x, y = event.x, event.y
+        canvas.coords(rect, x-2, 0, x+2, h)
+        posi = x
+
+def click(canvas, rect, event):
+    global move
     x, y = event.x, event.y
-    canvas.coords(rect, x-2, 0, x+2, h)
-    posi = x
+    if canvas.coords(rect)[0] - 5 < x and x < canvas.coords(rect)[2] + 5:
+        move = True
+    else:
+        move = False
+
+def mouse_motion(canvas, rect, event):
+    x, y = event.x, event.y
+    if canvas.coords(rect)[0] - 5 < x and x < canvas.coords(rect)[2] + 5:
+        canvas.config(cursor="hand2")
+    else:
+        canvas.config(cursor="")
 
 def quit(root, event):
     name = path.split('/')[-1]
@@ -80,7 +97,9 @@ def gui(img):
     tkimage = ImageTk.PhotoImage(master=canvas, image=img)
     canvas.create_image(0,0, anchor=tk.NW, image=tkimage)
     rect = canvas.create_rectangle(posi-2, 0, posi+2, h, fill="black", outline="white")
-    canvas.bind('<1>', partial(on_main_click, canvas, rect))
+    canvas.bind('<B1-Motion>', partial(on_main_click, canvas, rect))
+    canvas.bind('<1>', partial(click, canvas, rect))
+    canvas.bind('<Motion>', partial(mouse_motion, canvas, rect))
     root.bind('<KeyPress>', partial(quit, root))
     root.mainloop()
 
@@ -91,4 +110,5 @@ print("Click to place the mirror axis.\nPress any key to confirm.")
 img = Image.open(path).convert("RGBA")
 w, h = img.size
 posi = w/2
+move = False
 gui(img)
