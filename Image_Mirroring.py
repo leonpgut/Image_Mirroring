@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import filedialog as fd
 import sys
 from functools import partial
-import pyglet
 
 
 def getpath():
