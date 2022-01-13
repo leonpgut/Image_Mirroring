@@ -6,6 +6,7 @@ from functools import partial
 
 
 def getpath():
+    print("Choose an image to be mirrored.")
     rot = tk.Tk()
     rot.withdraw()
     files = [('Image', ['*.png', '*.jpg', "*.jpeg"])]
@@ -51,10 +52,29 @@ def quit(root, event):
     mr = mirrorright(img)
     print("Mirrored " + name + " successfully.")
     root.destroy()
-    print("Choose a location to save the mirrored left half.")
-    saveas(ml)
-    print("Choose a location to save the mirrored right half.")
-    saveas(mr)
+    showresults(ml, mr)
+
+def showresults(left, right):
+    root = tk.Tk()
+    root.title("Image Mirroring")
+    root.focus_force()
+    w = left.size[0] + right.size[0]
+    h = left.size[1]
+    root.geometry(str(w) + "x" + str(h + 60))
+    root.resizable(0,0)
+    canvas = tk.Canvas(root, width = w, height = h)      
+    canvas.pack()   
+    l = ImageTk.PhotoImage(master=canvas, image=left)
+    r = ImageTk.PhotoImage(master=canvas, image=right)
+    canvas.create_image(0, 0, anchor=tk.NW, image=l)
+    canvas.create_image(left.size[0], 0, anchor=tk.NW, image=r)
+    frame = tk.Frame(root, width = w, height = 60)
+    frame.pack()
+    butl = tk.Button(frame, text="Save left", command=partial(saveas, left))
+    butl.place(x=0, y=0, height=60, width=left.size[0])
+    butr = tk.Button(frame, text="Save right", command=partial(saveas, right))
+    butr.place(x=left.size[0], y=0, height=60, width=right.size[0])
+    root.mainloop()
 
 def left_key(canvas, rect, event):
     global posi, w
@@ -114,6 +134,7 @@ def bind_events(root, canvas, rect):
     root.bind('<space>', partial(quit, root))
 
 def gui(img):
+    print("Use the mouse to drag the mirror axis or move it using the arrow keys.\nPress the Confirm-Button, Space key or Enter key to confirm.")
     root = tk.Tk()
     root.title("Image Mirroring")
     root.focus_force()
@@ -131,12 +152,25 @@ def gui(img):
     but.place(x=0, y=0, height=60, width=w)
     root.mainloop()
 
-print("Choose an image to be mirrored.")
+
 path = getpath()
 checkfile(path)
-print("Use the mouse to drag the mirror axis or move it using the arrow keys.\nPress the Confirm-Button, Space key or Enter key to confirm.")
 img = Image.open(path).convert("RGBA")
 w, h = img.size
 posi = w/2
 move, grab = False, False
 gui(img)
+
+
+
+# canvas.height = canvas.winfo_reqheight()
+# canvas.width = canvas.winfo_reqwidth()
+# root.bind("<Configure>", partial(resize, canvas, rect))
+# 
+# # def resize(canvas, rect, event):
+#     # wscale = event.width/canvas.width
+#     # hscale = event.height/canvas.height
+#     canvas.width = event.width
+#     canvas.height = event.height - 60
+#     canvas.config(width=canvas.width, height=canvas.height)
+#     # canvas.scale("all", 0, 0, wscale, hscale)
