@@ -162,6 +162,7 @@ def resize(img):
     rot.withdraw()
     screenwidth = rot.winfo_screenwidth()
     screenheight = rot.winfo_screenheight()
+    resize_factor = 1
     if 2*w > screenwidth or h + 60 > screenheight:
         resize_factor = min(screenwidth/(2*w), screenheight/(h + 60))
     new_w = math.floor(resize_factor * w)
